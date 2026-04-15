@@ -1,0 +1,2183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>トラベルプランナー v2.0</title>
+<meta name="theme-color" content="#0a0a16">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="トラベルプランナー - 旅の計画をスマートに">
+<link rel="manifest" href="manifest.json">
+<style>
+:root {
+  --bg: #0a0a16;
+  --card: rgba(18,18,42,0.7);
+  --card-solid: #12122a;
+  --card-hover: rgba(26,26,62,0.8);
+  --accent: #00cec9;
+  --accent-dim: rgba(0,206,201,0.15);
+  --accent-glow: rgba(0,206,201,0.3);
+  --text: #e0e0ff;
+  --text-dim: #8b8fa3;
+  --text-muted: #5c6074;
+  --border: rgba(30,30,58,0.8);
+  --glass-border: rgba(255,255,255,0.06);
+  --green: #2ed573;
+  --green-dim: rgba(46,213,115,0.15);
+  --red: #ff6b6b;
+  --red-dim: rgba(255,107,107,0.15);
+  --yellow: #ffa502;
+  --yellow-dim: rgba(255,165,2,0.15);
+  --blue: #4a90d9;
+  --blue-dim: rgba(74,144,217,0.15);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 20% 20%, rgba(0,206,201,0.04) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 80%, rgba(74,144,217,0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10,10,22,0.85);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.header-back {
+  background: rgba(18,18,42,0.6);
+  border: 1px solid var(--glass-border);
+  color: var(--text-dim);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: none;
+  flex-shrink: 0;
+}
+
+.header-back:hover {
+  background: var(--card-hover);
+  color: var(--text);
+  border-color: var(--accent-glow);
+}
+
+.header-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), #0984e3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+
+.header-info {
+  min-width: 0;
+}
+
+.header-title {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--text), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-sub {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: -1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.header-btn {
+  background: rgba(18,18,42,0.6);
+  border: 1px solid var(--glass-border);
+  color: var(--text-dim);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  backdrop-filter: blur(8px);
+}
+
+.header-btn:hover {
+  background: var(--card-hover);
+  color: var(--text);
+  border-color: var(--accent-glow);
+}
+
+/* Bottom Nav */
+.bottom-nav {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  background: rgba(10,10,22,0.88);
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: space-around;
+  padding: 6px 0 max(6px, env(safe-area-inset-bottom));
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  flex-shrink: 0;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-family: inherit;
+}
+
+.nav-item .nav-icon { font-size: 18px; }
+
+.nav-item.active {
+  color: var(--accent);
+}
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+}
+
+.nav-item:not(.active):hover {
+  color: var(--text-dim);
+}
+
+/* Content area */
+.panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.panel.active { display: block; }
+
+/* Glass Card */
+.card {
+  background: var(--card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: var(--transition);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+.card:hover {
+  border-color: var(--accent-glow);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.card:active {
+  transform: scale(0.98);
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.card-sub {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.card-actions button {
+  background: rgba(18,18,42,0.6);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 8px;
+  color: var(--text-dim);
+  transition: var(--transition);
+}
+
+.card-actions button:hover {
+  background: var(--card-hover);
+  color: var(--text);
+  border-color: var(--accent-glow);
+}
+
+.card-actions button.danger:hover {
+  color: var(--red);
+  border-color: var(--red-dim);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+}
+
+.badge-plan { background: var(--accent-dim); color: var(--accent); }
+.badge-booked { background: var(--yellow-dim); color: var(--yellow); }
+.badge-done { background: var(--green-dim); color: var(--green); }
+
+/* Progress bar */
+.progress {
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  background: var(--accent);
+}
+
+.progress-bar.warn { background: var(--yellow); }
+.progress-bar.over { background: var(--red); }
+
+/* Buttons */
+.btn {
+  background: linear-gradient(135deg, var(--accent), #0984e3);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px var(--accent-glow);
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  color: var(--text-dim);
+  box-shadow: none;
+}
+
+.btn-outline:hover {
+  background: var(--card-hover);
+  color: var(--text);
+  border-color: var(--accent-glow);
+  box-shadow: none;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--red), #ee5a5a);
+  box-shadow: 0 4px 16px var(--red-dim);
+}
+
+.fab {
+  position: fixed;
+  bottom: 72px;
+  right: max(16px, calc((100vw - 600px)/2 + 16px));
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #0984e3);
+  color: #fff;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px var(--accent-glow);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.fab:hover { transform: scale(1.1); box-shadow: 0 6px 32px var(--accent-glow); }
+.fab:active { transform: scale(0.95); }
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal {
+  background: var(--card-solid);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 24px 20px;
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 18px;
+  background: linear-gradient(135deg, var(--text), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.form-group { margin-bottom: 14px; }
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  background: rgba(10,10,22,0.8);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: var(--transition);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.form-row { display: flex; gap: 10px; }
+.form-row .form-group { flex: 1; }
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.form-actions .btn { flex: 1; justify-content: center; }
+
+/* Trip detail header */
+.trip-detail { display: none; }
+.trip-detail.active { display: block; }
+
+.trip-header {
+  text-align: center;
+  padding: 12px 0 16px;
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 16px;
+}
+
+.trip-header h2 {
+  font-size: 20px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--text), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Trip tabs */
+.trip-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.trip-tabs button {
+  background: rgba(18,18,42,0.6);
+  border: 1px solid var(--glass-border);
+  color: var(--text-dim);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+  font-family: inherit;
+  backdrop-filter: blur(8px);
+}
+
+.trip-tabs button.active {
+  background: linear-gradient(135deg, var(--accent), #0984e3);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+
+.trip-tabs button:not(.active):hover {
+  background: var(--card-hover);
+  color: var(--text);
+}
+
+.trip-section { display: none; }
+.trip-section.active { display: block; }
+
+/* Itinerary */
+.day-group { margin-bottom: 20px; }
+
+.day-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 8px;
+  padding-left: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.day-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.activity {
+  background: var(--card);
+  border: 1px solid var(--glass-border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  transition: var(--transition);
+  backdrop-filter: blur(8px);
+}
+
+.activity:hover {
+  border-color: var(--accent-glow);
+  border-left-color: var(--accent);
+}
+
+.activity-time {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 700;
+  min-width: 45px;
+  padding-top: 1px;
+}
+
+.activity-body { flex: 1; min-width: 0; }
+
+.activity-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.activity-loc {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+
+.activity-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  font-style: italic;
+}
+
+.activity-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.activity-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+
+.activity-actions button:hover {
+  background: var(--card-hover);
+  color: var(--text);
+}
+
+.activity-actions button.danger:hover {
+  color: var(--red);
+}
+
+/* Packing */
+.pack-category { margin-bottom: 16px; }
+
+.pack-cat-head {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pack-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 4px;
+  transition: var(--transition);
+  backdrop-filter: blur(8px);
+}
+
+.pack-item:hover {
+  border-color: var(--accent-glow);
+}
+
+.pack-item input[type=checkbox] {
+  accent-color: var(--accent);
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.pack-item span {
+  flex: 1;
+  font-size: 13px;
+  transition: var(--transition);
+}
+
+.pack-item.checked span {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.pack-item button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px;
+  transition: var(--transition);
+}
+
+.pack-item button:hover { color: var(--red); }
+
+/* Budget */
+.budget-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.budget-box {
+  background: var(--card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 14px 10px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+}
+
+.budget-box .val {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -0.5px;
+}
+
+.budget-box .lbl {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+
+.budget-box.over .val { color: var(--red); }
+
+.expense-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  transition: var(--transition);
+  backdrop-filter: blur(8px);
+}
+
+.expense-item:hover { border-color: var(--accent-glow); }
+
+.expense-cat {
+  font-size: 18px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.expense-body { flex: 1; min-width: 0; }
+.expense-body .name { font-size: 13px; font-weight: 500; }
+.expense-body .cat { font-size: 11px; color: var(--text-dim); }
+.expense-amt { font-size: 14px; font-weight: 700; color: var(--yellow); }
+
+/* Wishlist */
+.wish-card {
+  background: var(--card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  transition: var(--transition);
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+}
+
+.wish-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+.wish-card:hover {
+  border-color: var(--accent-glow);
+  transform: translateY(-1px);
+}
+
+.wish-icon { font-size: 28px; min-width: 36px; text-align: center; }
+.wish-body { flex: 1; min-width: 0; }
+.wish-body h4 { font-size: 14px; font-weight: 700; }
+
+.wish-body .wish-meta {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 6px;
+  display: flex;
+  gap: 12px;
+}
+
+.priority-high { border-left: 3px solid var(--red); }
+.priority-mid { border-left: 3px solid var(--yellow); }
+.priority-low { border-left: 3px solid var(--green); }
+
+/* Photo Notes */
+.photo-note {
+  background: var(--card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 10px;
+  transition: var(--transition);
+  backdrop-filter: blur(12px);
+}
+
+.photo-note:hover { border-color: var(--accent-glow); }
+
+.photo-note-loc {
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.photo-note-date { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+.photo-note-text {
+  font-size: 13px;
+  margin-top: 10px;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+/* Currency */
+.currency-box {
+  background: var(--card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(12px);
+}
+
+.currency-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.currency-input input {
+  flex: 1;
+  background: rgba(10,10,22,0.8);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  color: var(--text);
+  font-size: 18px;
+  text-align: right;
+  outline: none;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.currency-input input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.currency-input select {
+  background: rgba(10,10,22,0.8);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.currency-input select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.currency-results { display: flex; flex-direction: column; gap: 8px; }
+
+.currency-result {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: rgba(10,10,22,0.6);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(8px);
+}
+
+.currency-result .cur { font-size: 14px; font-weight: 700; color: var(--accent); }
+.currency-result .val { font-size: 18px; font-weight: 800; }
+
+.rate-settings { margin-top: 16px; }
+
+.rate-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.rate-row label {
+  font-size: 12px;
+  color: var(--text-dim);
+  min-width: 100px;
+}
+
+.rate-row input {
+  flex: 1;
+  background: rgba(10,10,22,0.8);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--text);
+  font-size: 13px;
+  text-align: right;
+  outline: none;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.rate-row input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+/* Countdown */
+.countdown {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.countdown.past { color: var(--text-muted); }
+
+/* Search */
+.search-box {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.search-box input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px 10px 36px;
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+  transition: var(--transition);
+  backdrop-filter: blur(8px);
+}
+
+.search-box input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.search-box::before {
+  content: '\1F50D';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+/* Stats summary */
+.stats-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.stat-chip {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.stat-chip .stat-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.stat-chip .stat-lbl {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* Empty state */
+.empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-dim);
+}
+
+.empty .ico {
+  font-size: 48px;
+  margin-bottom: 14px;
+  opacity: 0.6;
+}
+
+.empty p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Chip filter */
+.filter-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-chip {
+  background: rgba(18,18,42,0.6);
+  border: 1px solid var(--glass-border);
+  color: var(--text-dim);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.filter-chip.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-color: var(--accent-glow);
+}
+
+.filter-chip:not(.active):hover {
+  background: var(--card-hover);
+  color: var(--text);
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--card-solid);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  z-index: 300;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+  backdrop-filter: blur(20px);
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* Sort indicator */
+.sort-btn {
+  background: rgba(18,18,42,0.6);
+  border: 1px solid var(--glass-border);
+  color: var(--text-dim);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sort-btn:hover {
+  background: var(--card-hover);
+  color: var(--text);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .header { padding: 12px 14px; }
+  .budget-summary { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .budget-box .val { font-size: 15px; }
+  .budget-box { padding: 10px 6px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="header-left">
+      <button class="header-back" id="backBtn" onclick="goBack()">&#8592;</button>
+      <div class="header-logo">&#9992;</div>
+      <div class="header-info">
+        <div class="header-title" id="headerTitle">トラベルプランナー</div>
+        <div class="header-sub" id="headerSub">旅の計画をスマートに</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="header-btn" onclick="exportData()" title="エクスポート">&#8595;</button>
+      <button class="header-btn" onclick="importData()" title="インポート">&#8593;</button>
+    </div>
+  </div>
+
+  <!-- Main Panels -->
+  <div class="panel active" id="panelTrips"></div>
+  <div class="panel" id="panelWishlist"></div>
+  <div class="panel" id="panelPhotos"></div>
+  <div class="panel" id="panelCurrency"></div>
+
+  <!-- Trip Detail -->
+  <div class="panel trip-detail" id="panelTripDetail"></div>
+
+  <button class="fab" id="fabBtn" onclick="handleFab()">+</button>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="trips" onclick="switchTab('trips')"><span class="nav-icon">&#9992;</span>旅行</button>
+    <button class="nav-item" data-tab="wishlist" onclick="switchTab('wishlist')"><span class="nav-icon">&#9733;</span>行きたい</button>
+    <button class="nav-item" data-tab="photos" onclick="switchTab('photos')"><span class="nav-icon">&#9998;</span>メモ</button>
+    <button class="nav-item" data-tab="currency" onclick="switchTab('currency')"><span class="nav-icon">&#165;</span>通貨</button>
+  </nav>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== DATA =====
+const STORAGE_KEY = 'travel_planner_data';
+const PACK_CATS = ['衣類','電子機器','書類','日用品','その他'];
+const PACK_ICONS = {'衣類':'&#128085;','電子機器':'&#128268;','書類':'&#128196;','日用品':'&#129524;','その他':'&#128230;'};
+const EXPENSE_CATS = ['交通','宿泊','食事','観光','買い物','その他'];
+const EXPENSE_ICONS = {'交通':'&#128643;','宿泊':'&#127976;','食事':'&#127869;','観光':'&#127915;','買い物':'&#128717;','その他':'&#128176;'};
+const STATUS_MAP = {'計画中':'badge-plan','予約済':'badge-booked','完了':'badge-done'};
+
+let data = loadData();
+let currentTab = 'trips';
+let currentTrip = null;
+let currentTripTab = 'itinerary';
+let tripFilter = 'all';
+let tripSearch = '';
+
+function defaultData() {
+  return {
+    trips: [
+      {
+        id:'t1', dest:'東京日帰り', dateFrom:'2026-04-15', dateTo:'2026-04-15', budget:15000, status:'計画中',
+        notes:'丸の内周辺を中心に散策',
+        itinerary:[
+          {id:'i1',day:1,time:'09:00',title:'東京駅到着',location:'東京駅',note:'丸の内口から出る'},
+          {id:'i2',day:1,time:'10:00',title:'浅草寺参拝',location:'浅草',note:'おみくじを引く'},
+          {id:'i3',day:1,time:'12:00',title:'仲見世でランチ',location:'仲見世通り',note:'メロンパンと揚げまんじゅう'},
+          {id:'i4',day:1,time:'14:00',title:'秋葉原散策',location:'秋葉原',note:'電気街を探索'},
+          {id:'i5',day:1,time:'17:00',title:'東京タワー',location:'東京タワー',note:'夕暮れの景色'},
+          {id:'i6',day:1,time:'19:00',title:'帰路',location:'東京駅',note:''}
+        ],
+        packing:[
+          {id:'p1',name:'モバイルバッテリー',cat:'電子機器',checked:false},
+          {id:'p2',name:'カメラ',cat:'電子機器',checked:false},
+          {id:'p3',name:'Suicaカード',cat:'書類',checked:true},
+          {id:'p4',name:'折りたたみ傘',cat:'日用品',checked:false},
+          {id:'p5',name:'歩きやすい靴',cat:'衣類',checked:true}
+        ],
+        expenses:[
+          {id:'e1',name:'新幹線往復',cat:'交通',amount:5000},
+          {id:'e2',name:'ランチ',cat:'食事',amount:1500},
+          {id:'e3',name:'東京タワー入場',cat:'観光',amount:1200}
+        ]
+      },
+      {
+        id:'t2', dest:'京都週末旅行', dateFrom:'2026-05-10', dateTo:'2026-05-11', budget:45000, status:'予約済',
+        notes:'ホテル予約済み。新幹線は早割で購入',
+        itinerary:[
+          {id:'i7',day:1,time:'08:00',title:'京都駅到着',location:'京都駅',note:'ホテルに荷物を預ける'},
+          {id:'i8',day:1,time:'09:30',title:'伏見稲荷大社',location:'伏見',note:'千本鳥居を歩く'},
+          {id:'i9',day:1,time:'12:00',title:'錦市場でランチ',location:'錦市場',note:'食べ歩き'},
+          {id:'i10',day:1,time:'14:00',title:'金閣寺',location:'金閣寺',note:'写真撮影'},
+          {id:'i11',day:1,time:'17:00',title:'祇園散策',location:'祇園',note:'花見小路を歩く'},
+          {id:'i12',day:2,time:'09:00',title:'嵐山竹林',location:'嵐山',note:'早朝がおすすめ'},
+          {id:'i13',day:2,time:'11:00',title:'天龍寺',location:'嵐山',note:'庭園を鑑賞'},
+          {id:'i14',day:2,time:'13:00',title:'ランチ＆お土産',location:'嵐山',note:'抹茶スイーツ'},
+          {id:'i15',day:2,time:'16:00',title:'帰路',location:'京都駅',note:''}
+        ],
+        packing:[
+          {id:'p6',name:'着替え（2日分）',cat:'衣類',checked:false},
+          {id:'p7',name:'充電器',cat:'電子機器',checked:false},
+          {id:'p8',name:'ホテル予約確認書',cat:'書類',checked:true},
+          {id:'p9',name:'歯ブラシセット',cat:'日用品',checked:false},
+          {id:'p10',name:'カメラ',cat:'電子機器',checked:false},
+          {id:'p11',name:'パジャマ',cat:'衣類',checked:false}
+        ],
+        expenses:[
+          {id:'e4',name:'新幹線往復',cat:'交通',amount:13000},
+          {id:'e5',name:'ホテル1泊',cat:'宿泊',amount:12000},
+          {id:'e6',name:'食事（2日分）',cat:'食事',amount:6000},
+          {id:'e7',name:'拝観料',cat:'観光',amount:2500},
+          {id:'e8',name:'お土産',cat:'買い物',amount:3000}
+        ]
+      },
+      {
+        id:'t3', dest:'パリ夢旅行', dateFrom:'2026-09-01', dateTo:'2026-09-07', budget:500000, status:'計画中',
+        notes:'航空券は早めに予約。パスポート有効期限を確認',
+        itinerary:[
+          {id:'i16',day:1,time:'10:00',title:'シャルル・ド・ゴール空港到着',location:'CDG空港',note:'タクシーでホテルへ'},
+          {id:'i17',day:1,time:'14:00',title:'エッフェル塔',location:'エッフェル塔',note:'頂上まで登る'},
+          {id:'i18',day:2,time:'09:00',title:'ルーブル美術館',location:'ルーブル',note:'モナリザは必見'},
+          {id:'i19',day:2,time:'14:00',title:'セーヌ川クルーズ',location:'セーヌ川',note:'午後の光がきれい'},
+          {id:'i20',day:3,time:'10:00',title:'ベルサイユ宮殿',location:'ベルサイユ',note:'庭園も散策'},
+          {id:'i21',day:4,time:'10:00',title:'モンマルトル',location:'モンマルトル',note:'サクレ・クール寺院'},
+          {id:'i22',day:4,time:'14:00',title:'シャンゼリゼ通り',location:'シャンゼリゼ',note:'ショッピング'},
+          {id:'i23',day:5,time:'10:00',title:'ノートルダム周辺',location:'シテ島',note:'再建の様子を見る'},
+          {id:'i24',day:5,time:'15:00',title:'マレ地区散策',location:'マレ',note:'カフェ巡り'},
+          {id:'i25',day:6,time:'自由',title:'自由行動日',location:'パリ市内',note:'行きたい場所を再訪'},
+          {id:'i26',day:7,time:'12:00',title:'帰国',location:'CDG空港',note:'お土産忘れずに'}
+        ],
+        packing:[
+          {id:'p12',name:'パスポート',cat:'書類',checked:false},
+          {id:'p13',name:'航空券',cat:'書類',checked:false},
+          {id:'p14',name:'変換プラグ（Cタイプ）',cat:'電子機器',checked:false},
+          {id:'p15',name:'着替え（7日分）',cat:'衣類',checked:false},
+          {id:'p16',name:'海外旅行保険証',cat:'書類',checked:false},
+          {id:'p17',name:'常備薬',cat:'日用品',checked:false},
+          {id:'p18',name:'モバイルWi-Fi',cat:'電子機器',checked:false},
+          {id:'p19',name:'ガイドブック',cat:'その他',checked:false}
+        ],
+        expenses:[
+          {id:'e9',name:'航空券',cat:'交通',amount:150000},
+          {id:'e10',name:'ホテル6泊',cat:'宿泊',amount:180000},
+          {id:'e11',name:'食事（7日分）',cat:'食事',amount:70000},
+          {id:'e12',name:'美術館・観光',cat:'観光',amount:30000},
+          {id:'e13',name:'お土産・ショッピング',cat:'買い物',amount:50000}
+        ]
+      }
+    ],
+    wishlist:[
+      {id:'w1',place:'北海道（富良野）',note:'ラベンダー畑を見たい',priority:'high',cost:80000},
+      {id:'w2',place:'沖縄',note:'ダイビングに挑戦',priority:'mid',cost:120000},
+      {id:'w3',place:'イタリア（ローマ）',note:'コロッセオとパスタ',priority:'low',cost:400000},
+      {id:'w4',place:'台湾（台北）',note:'夜市と小籠包',priority:'high',cost:60000}
+    ],
+    photoNotes:[
+      {id:'pn1',location:'鎌倉・大仏',date:'2025-11-03',text:'秋晴れの中で大仏を見上げた。思ったより大きくて圧倒された。\n近くの長谷寺の紅葉も美しかった。'},
+      {id:'pn2',location:'箱根・芦ノ湖',date:'2025-12-20',text:'冬の芦ノ湖は静かで幻想的。海賊船に乗って湖を渡った。\n富士山がくっきり見えて最高のタイミングだった。'},
+      {id:'pn3',location:'横浜・中華街',date:'2026-01-15',text:'春節の飾りがまだ残っていて華やか。\n肉まんと小籠包を食べ歩き。占い横丁も面白かった。'}
+    ],
+    rates:{JPY_EUR:0.006,JPY_USD:0.0067,EUR_USD:1.12,EUR_JPY:165,USD_JPY:149,USD_EUR:0.89}
+  };
+}
+
+function loadData() {
+  try {
+    const d = localStorage.getItem(STORAGE_KEY);
+    if (!d) return defaultData();
+    const parsed = JSON.parse(d);
+    // Migration: add notes field to trips if missing
+    if (parsed.trips) {
+      parsed.trips.forEach(t => { if (t.notes === undefined) t.notes = ''; });
+    }
+    return parsed;
+  } catch(e) { return defaultData(); }
+}
+
+function saveData() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+  catch(e) { showToast('保存に失敗しました（容量不足の可能性）'); }
+}
+
+function genId() { return 'id' + Date.now() + Math.random().toString(36).substr(2,5); }
+function fmt(n) { return (n||0).toLocaleString('ja-JP'); }
+function esc(s) { if(!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// Days until trip
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const target = new Date(dateStr);
+  target.setHours(0,0,0,0);
+  return Math.ceil((target - today) / 86400000);
+}
+
+function countdownText(dateFrom, dateTo) {
+  const daysTo = daysUntil(dateFrom);
+  const daysEnd = daysUntil(dateTo);
+  if (daysTo === null) return '';
+  if (daysTo > 0) return `あと${daysTo}日`;
+  if (daysTo === 0) return '今日出発!';
+  if (daysEnd !== null && daysEnd >= 0) return '旅行中!';
+  return '旅行済み';
+}
+
+function countdownClass(dateFrom) {
+  const d = daysUntil(dateFrom);
+  return (d !== null && d < 0) ? 'past' : '';
+}
+
+// ===== NAVIGATION =====
+function switchTab(tab) {
+  currentTab = tab;
+  currentTrip = null;
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel' + cap(tab)).classList.add('active');
+  document.getElementById('backBtn').style.display = 'none';
+  document.getElementById('headerTitle').textContent = 'トラベルプランナー';
+  document.getElementById('headerSub').textContent =
+    tab === 'trips' ? '旅の計画をスマートに' :
+    tab === 'wishlist' ? '行きたい場所リスト' :
+    tab === 'photos' ? '旅の記録メモ' : '通貨計算機';
+  document.getElementById('fabBtn').style.display = tab === 'currency' ? 'none' : 'flex';
+  render();
+}
+
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function openTrip(id) {
+  currentTrip = data.trips.find(t => t.id === id);
+  if (!currentTrip) return;
+  currentTripTab = 'itinerary';
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panelTripDetail').classList.add('active');
+  document.getElementById('backBtn').style.display = 'inline-flex';
+  document.getElementById('headerTitle').textContent = currentTrip.dest;
+  const dateText = currentTrip.dateFrom + (currentTrip.dateFrom !== currentTrip.dateTo ? ' ~ ' + currentTrip.dateTo : '');
+  document.getElementById('headerSub').textContent = dateText;
+  document.getElementById('fabBtn').style.display = 'flex';
+  renderTripDetail();
+}
+
+function goBack() { switchTab(currentTab); }
+
+// ===== RENDER =====
+function render() {
+  if (currentTab === 'trips') renderTrips();
+  else if (currentTab === 'wishlist') renderWishlist();
+  else if (currentTab === 'photos') renderPhotos();
+  else if (currentTab === 'currency') renderCurrency();
+}
+
+function renderTrips() {
+  const el = document.getElementById('panelTrips');
+  if (!data.trips.length) {
+    el.innerHTML = '<div class="empty"><div class="ico">&#9992;</div><p>まだ旅行がありません<br>+ボタンで追加しましょう</p></div>';
+    return;
+  }
+
+  // Stats
+  const totalTrips = data.trips.length;
+  const upcoming = data.trips.filter(t => daysUntil(t.dateFrom) > 0).length;
+  const totalBudget = data.trips.reduce((s,t) => s + (t.budget||0), 0);
+
+  let h = '';
+
+  // Stats row
+  h += `<div class="stats-row">
+    <div class="stat-chip"><div class="stat-val">${totalTrips}</div><div class="stat-lbl">旅行</div></div>
+    <div class="stat-chip"><div class="stat-val">${upcoming}</div><div class="stat-lbl">予定</div></div>
+    <div class="stat-chip"><div class="stat-val">&yen;${fmt(totalBudget)}</div><div class="stat-lbl">総予算</div></div>
+  </div>`;
+
+  // Filter chips
+  h += `<div class="filter-row">
+    <button class="filter-chip ${tripFilter==='all'?'active':''}" onclick="setTripFilter('all')">すべて</button>
+    <button class="filter-chip ${tripFilter==='計画中'?'active':''}" onclick="setTripFilter('計画中')">計画中</button>
+    <button class="filter-chip ${tripFilter==='予約済'?'active':''}" onclick="setTripFilter('予約済')">予約済</button>
+    <button class="filter-chip ${tripFilter==='完了'?'active':''}" onclick="setTripFilter('完了')">完了</button>
+  </div>`;
+
+  // Filter trips
+  let trips = data.trips;
+  if (tripFilter !== 'all') {
+    trips = trips.filter(t => t.status === tripFilter);
+  }
+
+  if (!trips.length) {
+    h += '<div class="empty"><p>該当する旅行がありません</p></div>';
+    el.innerHTML = h;
+    return;
+  }
+
+  // Sort: upcoming first, then by date
+  trips = [...trips].sort((a,b) => {
+    const da = daysUntil(a.dateFrom);
+    const db = daysUntil(b.dateFrom);
+    // Upcoming trips first (positive days), then ongoing (0 or between), then past
+    if (da >= 0 && db < 0) return -1;
+    if (da < 0 && db >= 0) return 1;
+    if (da >= 0 && db >= 0) return da - db; // Soonest first
+    return db - da; // Most recent past first
+  });
+
+  trips.forEach(t => {
+    const spent = t.expenses.reduce((s,e) => s + e.amount, 0);
+    const pct = t.budget ? Math.round(spent / t.budget * 100) : 0;
+    const days = t.dateFrom === t.dateTo ? '日帰り' : Math.ceil((new Date(t.dateTo) - new Date(t.dateFrom)) / 86400000) + 1 + '日間';
+    const cd = countdownText(t.dateFrom, t.dateTo);
+    const cdClass = countdownClass(t.dateFrom);
+    const packTotal = t.packing ? t.packing.length : 0;
+    const packDone = t.packing ? t.packing.filter(p => p.checked).length : 0;
+    const packPct = packTotal ? Math.round(packDone / packTotal * 100) : 0;
+
+    h += `<div class="card" onclick="openTrip('${t.id}')">
+      <div class="card-head">
+        <div style="min-width:0;flex:1">
+          <div class="card-title">&#9992; ${esc(t.dest)}</div>
+          <div class="card-sub">${t.dateFrom} ${t.dateFrom !== t.dateTo ? '~ ' + t.dateTo : ''} (${days})</div>
+          ${cd ? '<div class="countdown ' + cdClass + '">' + cd + '</div>' : ''}
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <span class="badge ${STATUS_MAP[t.status]}">${t.status}</span>
+          <div class="card-actions" style="margin-top:8px;justify-content:flex-end">
+            <button onclick="event.stopPropagation();editTrip('${t.id}')" title="編集">&#9998;</button>
+            <button class="danger" onclick="event.stopPropagation();deleteTrip('${t.id}')" title="削除">&#10005;</button>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-dim);margin-bottom:6px">
+        <span>予算: &yen;${fmt(t.budget)}</span>
+        <span>支出: &yen;${fmt(spent)} (${pct}%)</span>
+      </div>
+      <div class="progress"><div class="progress-bar ${pct > 100 ? 'over' : pct > 80 ? 'warn' : ''}" style="width:${Math.min(pct,100)}%"></div></div>
+      ${packTotal ? '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:6px"><span>持ち物: ' + packDone + '/' + packTotal + '</span><span>' + packPct + '%</span></div>' : ''}
+    </div>`;
+  });
+  el.innerHTML = h;
+}
+
+function setTripFilter(f) {
+  tripFilter = f;
+  renderTrips();
+}
+
+function renderTripDetail() {
+  const t = currentTrip;
+  if (!t) return;
+  const el = document.getElementById('panelTripDetail');
+  let h = `<div class="trip-tabs">
+    <button class="${currentTripTab === 'itinerary' ? 'active' : ''}" onclick="switchTripTab('itinerary')">&#128197; 旅程</button>
+    <button class="${currentTripTab === 'packing' ? 'active' : ''}" onclick="switchTripTab('packing')">&#127890; 持ち物</button>
+    <button class="${currentTripTab === 'budget' ? 'active' : ''}" onclick="switchTripTab('budget')">&#128176; 予算</button>
+    <button class="${currentTripTab === 'notes' ? 'active' : ''}" onclick="switchTripTab('notes')">&#128221; メモ</button>
+  </div>`;
+  h += `<div class="trip-section ${currentTripTab === 'itinerary' ? 'active' : ''}">${renderItinerary(t)}</div>`;
+  h += `<div class="trip-section ${currentTripTab === 'packing' ? 'active' : ''}">${renderPacking(t)}</div>`;
+  h += `<div class="trip-section ${currentTripTab === 'budget' ? 'active' : ''}">${renderBudget(t)}</div>`;
+  h += `<div class="trip-section ${currentTripTab === 'notes' ? 'active' : ''}">${renderTripNotes(t)}</div>`;
+  el.innerHTML = h;
+}
+
+function switchTripTab(tab) { currentTripTab = tab; renderTripDetail(); }
+
+function renderItinerary(t) {
+  if (!t.itinerary.length) return '<div class="empty"><div class="ico">&#128197;</div><p>アクティビティがありません<br>+ボタンで追加</p></div>';
+  const days = {};
+  t.itinerary.forEach(a => { if (!days[a.day]) days[a.day] = []; days[a.day].push(a); });
+
+  // Calculate actual date for each day
+  const fromDate = t.dateFrom ? new Date(t.dateFrom) : null;
+
+  let h = '';
+  Object.keys(days).sort((a,b) => a - b).forEach(d => {
+    let dateStr = '';
+    if (fromDate) {
+      const dayDate = new Date(fromDate);
+      dayDate.setDate(dayDate.getDate() + parseInt(d) - 1);
+      dateStr = ' (' + (dayDate.getMonth()+1) + '/' + dayDate.getDate() + ')';
+    }
+    h += `<div class="day-group"><div class="day-label">Day ${d}${dateStr}</div>`;
+    days[d].sort((a,b) => a.time.localeCompare(b.time)).forEach(a => {
+      h += `<div class="activity">
+        <div class="activity-time">${esc(a.time)}</div>
+        <div class="activity-body">
+          <div class="activity-title">${esc(a.title)}</div>
+          ${a.location ? '<div class="activity-loc">&#128205; ' + esc(a.location) + '</div>' : ''}
+          ${a.note ? '<div class="activity-note">' + esc(a.note) + '</div>' : ''}
+        </div>
+        <div class="activity-actions">
+          <button onclick="editActivity('${a.id}')">&#9998;</button>
+          <button class="danger" onclick="deleteActivity('${a.id}')">&#10005;</button>
+        </div>
+      </div>`;
+    });
+    h += '</div>';
+  });
+  return h;
+}
+
+function renderPacking(t) {
+  const total = t.packing.length;
+  const checked = t.packing.filter(p => p.checked).length;
+  const pct = total ? Math.round(checked / total * 100) : 0;
+
+  if (!total) return '<div class="empty"><div class="ico">&#127890;</div><p>持ち物リストが空です<br>+ボタンで追加</p></div>';
+
+  let h = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <span style="font-size:13px;color:var(--text-dim)">完了: ${checked}/${total} (${pct}%)</span>
+    ${checked > 0 ? '<button class="sort-btn" onclick="uncheckAllPacking()">全リセット</button>' : ''}
+  </div>
+  <div class="progress" style="margin-bottom:16px"><div class="progress-bar ${pct===100?'':'warn'}" style="width:${pct}%;background:${pct===100?'var(--green)':'var(--accent)'}"></div></div>`;
+
+  PACK_CATS.forEach(cat => {
+    const items = t.packing.filter(p => p.cat === cat);
+    if (!items.length) return;
+    h += `<div class="pack-category"><div class="pack-cat-head">${PACK_ICONS[cat]||''} ${cat} <span style="font-size:11px;color:var(--text-muted);font-weight:400">(${items.filter(i=>i.checked).length}/${items.length})</span></div>`;
+    items.forEach(p => {
+      h += `<div class="pack-item ${p.checked ? 'checked' : ''}">
+        <input type="checkbox" ${p.checked ? 'checked' : ''} onchange="togglePack('${p.id}')">
+        <span>${esc(p.name)}</span>
+        <button onclick="deletePack('${p.id}')">&#10005;</button>
+      </div>`;
+    });
+    h += '</div>';
+  });
+  return h;
+}
+
+function renderBudget(t) {
+  const spent = t.expenses.reduce((s,e) => s + e.amount, 0);
+  const remain = t.budget - spent;
+  const pct = t.budget ? Math.round(spent / t.budget * 100) : 0;
+
+  let h = `<div class="budget-summary">
+    <div class="budget-box"><div class="val">&yen;${fmt(t.budget)}</div><div class="lbl">予算</div></div>
+    <div class="budget-box"><div class="val">&yen;${fmt(spent)}</div><div class="lbl">支出</div></div>
+    <div class="budget-box ${remain < 0 ? 'over' : ''}"><div class="val">&yen;${fmt(remain)}</div><div class="lbl">残り</div></div>
+  </div>`;
+
+  // Overall progress
+  h += `<div class="progress" style="margin-bottom:16px;height:6px"><div class="progress-bar ${pct > 100 ? 'over' : pct > 80 ? 'warn' : ''}" style="width:${Math.min(pct,100)}%"></div></div>`;
+
+  // Category breakdown
+  h += '<div style="margin-bottom:16px">';
+  EXPENSE_CATS.forEach(cat => {
+    const catTotal = t.expenses.filter(e => e.cat === cat).reduce((s,e) => s + e.amount, 0);
+    if (!catTotal) return;
+    const catPct = spent ? Math.round(catTotal / spent * 100) : 0;
+    h += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px">
+      <span style="min-width:55px">${EXPENSE_ICONS[cat]} ${cat}</span>
+      <div style="flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${catPct}%;background:var(--accent);border-radius:3px;transition:width 0.3s"></div>
+      </div>
+      <span style="min-width:75px;text-align:right;color:var(--text-dim)">&yen;${fmt(catTotal)}</span>
+    </div>`;
+  });
+  h += '</div>';
+
+  // Expense list
+  if (!t.expenses.length) {
+    h += '<div class="empty"><p>支出がありません<br>+ボタンで追加</p></div>';
+    return h;
+  }
+
+  t.expenses.forEach(e => {
+    h += `<div class="expense-item">
+      <div class="expense-cat">${EXPENSE_ICONS[e.cat] || '&#128176;'}</div>
+      <div class="expense-body"><div class="name">${esc(e.name)}</div><div class="cat">${esc(e.cat)}</div></div>
+      <div class="expense-amt">&yen;${fmt(e.amount)}</div>
+      <div class="activity-actions">
+        <button onclick="editExpense('${e.id}')">&#9998;</button>
+        <button class="danger" onclick="deleteExpense('${e.id}')">&#10005;</button>
+      </div>
+    </div>`;
+  });
+  return h;
+}
+
+function renderTripNotes(t) {
+  const notes = t.notes || '';
+  return `<div style="margin-bottom:12px">
+    <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px">旅行メモ・備忘録</div>
+    <textarea id="tripNotesArea" style="width:100%;min-height:200px;background:var(--card);border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;resize:vertical;line-height:1.7;transition:var(--transition)"
+      onfocus="this.style.borderColor='var(--accent)';this.style.boxShadow='0 0 0 3px var(--accent-dim)'"
+      onblur="this.style.borderColor='var(--glass-border)';this.style.boxShadow='none';saveTripNotes()"
+      placeholder="旅行に関するメモを自由に書けます...">${esc(notes)}</textarea>
+  </div>`;
+}
+
+function saveTripNotes() {
+  if (!currentTrip) return;
+  const area = document.getElementById('tripNotesArea');
+  if (area) {
+    currentTrip.notes = area.value;
+    saveData();
+    showToast('メモを保存しました');
+  }
+}
+
+function renderWishlist() {
+  const el = document.getElementById('panelWishlist');
+  if (!data.wishlist.length) {
+    el.innerHTML = '<div class="empty"><div class="ico">&#9733;</div><p>行きたい場所を追加しましょう<br>+ボタンで追加</p></div>';
+    return;
+  }
+  let h = '';
+
+  // Total cost estimate
+  const totalCost = data.wishlist.reduce((s,w) => s + (w.cost||0), 0);
+  h += `<div style="text-align:right;font-size:12px;color:var(--text-dim);margin-bottom:12px">
+    合計予算: <span style="color:var(--accent);font-weight:700">&yen;${fmt(totalCost)}</span> (${data.wishlist.length}件)
+  </div>`;
+
+  const sorted = [...data.wishlist].sort((a,b) => {
+    const o = {high:0, mid:1, low:2};
+    return o[a.priority] - o[b.priority];
+  });
+
+  sorted.forEach(w => {
+    const pClass = w.priority === 'high' ? 'priority-high' : w.priority === 'mid' ? 'priority-mid' : 'priority-low';
+    const pLabel = w.priority === 'high' ? '&#9733; 高' : w.priority === 'mid' ? '&#9733; 中' : '&#9733; 低';
+    h += `<div class="wish-card ${pClass}">
+      <div class="wish-icon">&#127757;</div>
+      <div class="wish-body">
+        <h4>${esc(w.place)}</h4>
+        <div style="font-size:12px;margin-top:4px;color:var(--text);line-height:1.5">${esc(w.note || '')}</div>
+        <div class="wish-meta"><span>${pLabel}</span><span>&yen;${fmt(w.cost||0)}</span></div>
+      </div>
+      <div class="card-actions" style="flex-direction:column">
+        <button onclick="promoteWish('${w.id}')" title="旅行に追加">&#9992;</button>
+        <button onclick="editWish('${w.id}')" title="編集">&#9998;</button>
+        <button class="danger" onclick="deleteWish('${w.id}')" title="削除">&#10005;</button>
+      </div>
+    </div>`;
+  });
+  el.innerHTML = h;
+}
+
+function renderPhotos() {
+  const el = document.getElementById('panelPhotos');
+  if (!data.photoNotes.length) {
+    el.innerHTML = '<div class="empty"><div class="ico">&#9998;</div><p>旅の記録を残しましょう<br>+ボタンで追加</p></div>';
+    return;
+  }
+  let h = '';
+  const sorted = [...data.photoNotes].sort((a,b) => b.date.localeCompare(a.date));
+
+  // Group by year-month
+  const groups = {};
+  sorted.forEach(pn => {
+    const ym = pn.date ? pn.date.substring(0,7) : '不明';
+    if (!groups[ym]) groups[ym] = [];
+    groups[ym].push(pn);
+  });
+
+  Object.keys(groups).forEach(ym => {
+    const [y,m] = ym.split('-');
+    h += `<div style="font-size:12px;color:var(--accent);font-weight:700;margin-bottom:8px;margin-top:4px">${y}年${parseInt(m)}月</div>`;
+    groups[ym].forEach(pn => {
+      h += `<div class="photo-note">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div><div class="photo-note-loc">&#128205; ${esc(pn.location)}</div>
+          <div class="photo-note-date">${pn.date}</div></div>
+          <div class="card-actions">
+            <button onclick="editPhoto('${pn.id}')" title="編集">&#9998;</button>
+            <button class="danger" onclick="deletePhoto('${pn.id}')" title="削除">&#10005;</button>
+          </div>
+        </div>
+        <div class="photo-note-text">${esc(pn.text)}</div>
+      </div>`;
+    });
+  });
+  el.innerHTML = h;
+}
+
+function renderCurrency() {
+  const el = document.getElementById('panelCurrency');
+  const r = data.rates;
+  el.innerHTML = `<div class="currency-box">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:14px;background:linear-gradient(135deg,var(--text),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">&#128177; 通貨変換</h3>
+    <div class="currency-input">
+      <input type="number" id="curAmount" value="10000" oninput="calcCurrency()" placeholder="金額">
+      <select id="curFrom" onchange="calcCurrency()">
+        <option value="JPY">JPY</option><option value="EUR">EUR</option><option value="USD">USD</option>
+      </select>
+    </div>
+    <div class="currency-results" id="curResults"></div>
+  </div>
+  <div class="currency-box">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:14px;background:linear-gradient(135deg,var(--text),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">&#9881; レート設定</h3>
+    <div class="rate-settings">
+      <div class="rate-row"><label>1 JPY = ? EUR</label><input type="number" step="0.0001" value="${r.JPY_EUR}" onchange="updateRate('JPY_EUR',this.value)"></div>
+      <div class="rate-row"><label>1 JPY = ? USD</label><input type="number" step="0.0001" value="${r.JPY_USD}" onchange="updateRate('JPY_USD',this.value)"></div>
+      <div class="rate-row"><label>1 EUR = ? JPY</label><input type="number" step="0.01" value="${r.EUR_JPY}" onchange="updateRate('EUR_JPY',this.value)"></div>
+      <div class="rate-row"><label>1 EUR = ? USD</label><input type="number" step="0.01" value="${r.EUR_USD}" onchange="updateRate('EUR_USD',this.value)"></div>
+      <div class="rate-row"><label>1 USD = ? JPY</label><input type="number" step="0.01" value="${r.USD_JPY}" onchange="updateRate('USD_JPY',this.value)"></div>
+      <div class="rate-row"><label>1 USD = ? EUR</label><input type="number" step="0.01" value="${r.USD_EUR}" onchange="updateRate('USD_EUR',this.value)"></div>
+    </div>
+  </div>`;
+  calcCurrency();
+}
+
+function calcCurrency() {
+  const amt = parseFloat(document.getElementById('curAmount').value) || 0;
+  const from = document.getElementById('curFrom').value;
+  const r = data.rates;
+  const targets = ['JPY','EUR','USD'].filter(c => c !== from);
+  let h = '';
+  targets.forEach(to => {
+    const key = from + '_' + to;
+    const rate = r[key] || 0;
+    const result = amt * rate;
+    h += `<div class="currency-result"><span class="cur">${to}</span><span class="val">${result.toLocaleString('ja-JP',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`;
+  });
+  const resEl = document.getElementById('curResults');
+  if (resEl) resEl.innerHTML = h;
+}
+
+function updateRate(key, val) { data.rates[key] = parseFloat(val) || 0; saveData(); calcCurrency(); }
+
+// ===== FAB HANDLER =====
+function handleFab() {
+  if (currentTrip) {
+    if (currentTripTab === 'itinerary') showActivityForm();
+    else if (currentTripTab === 'packing') showPackForm();
+    else if (currentTripTab === 'budget') showExpenseForm();
+    else if (currentTripTab === 'notes') { /* focus textarea */ document.getElementById('tripNotesArea')?.focus(); }
+  } else if (currentTab === 'trips') showTripForm();
+  else if (currentTab === 'wishlist') showWishForm();
+  else if (currentTab === 'photos') showPhotoForm();
+}
+
+// ===== MODALS =====
+function showModal(html) {
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('show');
+  // Auto focus first input
+  setTimeout(() => {
+    const first = document.querySelector('.modal input:not([type=checkbox]):not([type=hidden]), .modal textarea');
+    if (first) first.focus();
+  }, 100);
+}
+
+function hideModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) hideModal();
+});
+
+// Close modal on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') hideModal();
+});
+
+// ===== TRIP CRUD =====
+function showTripForm(trip) {
+  const t = trip || {dest:'', dateFrom:'', dateTo:'', budget:0, status:'計画中'};
+  const isEdit = !!trip;
+  showModal(`<h2>${isEdit ? '旅行を編集' : '新しい旅行'}</h2>
+    <div class="form-group"><label>行き先</label><input id="fDest" value="${esc(t.dest)}" placeholder="例：北海道"></div>
+    <div class="form-row">
+      <div class="form-group"><label>出発日</label><input type="date" id="fFrom" value="${t.dateFrom}"></div>
+      <div class="form-group"><label>帰宅日</label><input type="date" id="fTo" value="${t.dateTo}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>予算（円）</label><input type="number" id="fBudget" value="${t.budget}" placeholder="50000"></div>
+      <div class="form-group"><label>ステータス</label>
+        <select id="fStatus">
+          <option ${t.status==='計画中'?'selected':''}>計画中</option>
+          <option ${t.status==='予約済'?'selected':''}>予約済</option>
+          <option ${t.status==='完了'?'selected':''}>完了</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="hideModal()">キャンセル</button>
+      <button class="btn" onclick="saveTrip('${isEdit ? t.id : ''}')">保存</button>
+    </div>`);
+}
+
+function saveTrip(id) {
+  const dest = document.getElementById('fDest').value.trim();
+  if (!dest) { showToast('行き先を入力してください'); return; }
+  const dateFrom = document.getElementById('fFrom').value;
+  const dateTo = document.getElementById('fTo').value || dateFrom;
+  // Validate dates
+  if (dateFrom && dateTo && dateTo < dateFrom) {
+    showToast('帰宅日は出発日以降にしてください');
+    return;
+  }
+  const obj = {
+    dest, dateFrom, dateTo,
+    budget: parseInt(document.getElementById('fBudget').value) || 0,
+    status: document.getElementById('fStatus').value
+  };
+  if (id) {
+    const t = data.trips.find(t => t.id === id);
+    if (t) Object.assign(t, obj);
+  } else {
+    data.trips.push({id:genId(), ...obj, notes:'', itinerary:[], packing:[], expenses:[]});
+  }
+  saveData(); hideModal(); render();
+  showToast(id ? '旅行を更新しました' : '旅行を追加しました');
+}
+
+function editTrip(id) { const t = data.trips.find(t => t.id === id); if (t) showTripForm(t); }
+
+function deleteTrip(id) {
+  if (!confirm('この旅行を削除しますか？')) return;
+  data.trips = data.trips.filter(t => t.id !== id);
+  saveData(); render();
+  showToast('旅行を削除しました');
+}
+
+// ===== ACTIVITY CRUD =====
+function showActivityForm(act) {
+  const a = act || {day:1, time:'', title:'', location:'', note:''};
+  const isEdit = !!act;
+  const maxDay = currentTrip.dateFrom === currentTrip.dateTo ? 1 : Math.ceil((new Date(currentTrip.dateTo) - new Date(currentTrip.dateFrom)) / 86400000) + 1;
+  let dayOpts = '';
+  for (let i = 1; i <= Math.max(maxDay, 7); i++) dayOpts += `<option value="${i}" ${a.day === i ? 'selected' : ''}>Day ${i}</option>`;
+  showModal(`<h2>${isEdit ? 'アクティビティ編集' : 'アクティビティ追加'}</h2>
+    <div class="form-row">
+      <div class="form-group"><label>日</label><select id="fDay">${dayOpts}</select></div>
+      <div class="form-group"><label>時間</label><input type="time" id="fTime" value="${esc(a.time)}" placeholder="10:00"></div>
+    </div>
+    <div class="form-group"><label>タイトル</label><input id="fTitle" value="${esc(a.title)}" placeholder="浅草寺参拝"></div>
+    <div class="form-group"><label>場所</label><input id="fLoc" value="${esc(a.location)}" placeholder="浅草"></div>
+    <div class="form-group"><label>メモ</label><textarea id="fNote">${esc(a.note)}</textarea></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="hideModal()">キャンセル</button>
+      <button class="btn" onclick="saveActivity('${isEdit ? a.id : ''}')">保存</button>
+    </div>`);
+}
+
+function saveActivity(id) {
+  const title = document.getElementById('fTitle').value.trim();
+  if (!title) { showToast('タイトルを入力してください'); return; }
+  const obj = {
+    day: parseInt(document.getElementById('fDay').value),
+    time: document.getElementById('fTime').value.trim(),
+    title,
+    location: document.getElementById('fLoc').value.trim(),
+    note: document.getElementById('fNote').value.trim()
+  };
+  if (id) {
+    const a = currentTrip.itinerary.find(a => a.id === id);
+    if (a) Object.assign(a, obj);
+  } else {
+    currentTrip.itinerary.push({id:genId(), ...obj});
+  }
+  saveData(); hideModal(); renderTripDetail();
+  showToast(id ? 'アクティビティを更新' : 'アクティビティを追加');
+}
+
+function editActivity(id) { const a = currentTrip.itinerary.find(a => a.id === id); if (a) showActivityForm(a); }
+
+function deleteActivity(id) {
+  if (!confirm('このアクティビティを削除しますか？')) return;
+  currentTrip.itinerary = currentTrip.itinerary.filter(a => a.id !== id);
+  saveData(); renderTripDetail();
+  showToast('アクティビティを削除');
+}
+
+// ===== PACKING CRUD =====
+function showPackForm() {
+  let catOpts = PACK_CATS.map(c => `<option>${c}</option>`).join('');
+  showModal(`<h2>持ち物を追加</h2>
+    <div class="form-group"><label>アイテム名</label><input id="fPackName" placeholder="モバイルバッテリー"></div>
+    <div class="form-group"><label>カテゴリ</label><select id="fPackCat">${catOpts}</select></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="hideModal()">キャンセル</button>
+      <button class="btn" onclick="savePack()">追加</button>
+    </div>`);
+}
+
+function savePack() {
+  const name = document.getElementById('fPackName').value.trim();
+  if (!name) { showToast('アイテム名を入力してください'); return; }
+  currentTrip.packing.push({id:genId(), name, cat:document.getElementById('fPackCat').value, checked:false});
+  saveData(); hideModal(); renderTripDetail();
+  showToast('持ち物を追加');
+}
+
+function togglePack(id) {
+  const p = currentTrip.packing.find(p => p.id === id);
+  if (p) {
+    p.checked = !p.checked;
+    saveData();
+    renderTripDetail();
+    // Check if all done
+    if (currentTrip.packing.every(p => p.checked)) {
+      showToast('全ての持ち物を準備完了!');
+    }
+  }
+}
+
+function uncheckAllPacking() {
+  if (!confirm('全てのチェックをリセットしますか？')) return;
+  currentTrip.packing.forEach(p => p.checked = false);
+  saveData(); renderTripDetail();
+  showToast('チェックをリセットしました');
+}
+
+function deletePack(id) {
+  if (!confirm('この持ち物を削除しますか？')) return;
+  currentTrip.packing = currentTrip.packing.filter(p => p.id !== id);
+  saveData(); renderTripDetail();
+}
+
+// ===== EXPENSE CRUD =====
+function showExpenseForm(exp) {
+  const e = exp || {name:'', cat:'食事', amount:0};
+  const isEdit = !!exp;
+  let catOpts = EXPENSE_CATS.map(c => `<option ${e.cat === c ? 'selected' : ''}>${c}</option>`).join('');
+  showModal(`<h2>${isEdit ? '支出を編集' : '支出を追加'}</h2>
+    <div class="form-group"><label>内容</label><input id="fExpName" value="${esc(e.name)}" placeholder="ランチ"></div>
+    <div class="form-row">
+      <div class="form-group"><label>カテゴリ</label><select id="fExpCat">${catOpts}</select></div>
+      <div class="form-group"><label>金額（円）</label><input type="number" id="fExpAmt" value="${e.amount}" placeholder="1500"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="hideModal()">キャンセル</button>
+      <button class="btn" onclick="saveExpense('${isEdit ? e.id : ''}')">保存</button>
+    </div>`);
+}
+
+function saveExpense(id) {
+  const name = document.getElementById('fExpName').value.trim();
+  if (!name) { showToast('内容を入力してください'); return; }
+  const obj = {
+    name,
+    cat: document.getElementById('fExpCat').value,
+    amount: parseInt(document.getElementById('fExpAmt').value) || 0
+  };
+  if (id) {
+    const e = currentTrip.expenses.find(e => e.id === id);
+    if (e) Object.assign(e, obj);
+  } else {
+    currentTrip.expenses.push({id:genId(), ...obj});
+  }
+  saveData(); hideModal(); renderTripDetail();
+  showToast(id ? '支出を更新' : '支出を追加');
+}
+
+function editExpense(id) { const e = currentTrip.expenses.find(e => e.id === id); if (e) showExpenseForm(e); }
+
+function deleteExpense(id) {
+  if (!confirm('この支出を削除しますか？')) return;
+  currentTrip.expenses = currentTrip.expenses.filter(e => e.id !== id);
+  saveData(); renderTripDetail();
+}
+
+// ===== WISHLIST CRUD =====
+function showWishForm(wish) {
+  const w = wish || {place:'', note:'', priority:'mid', cost:0};
+  const isEdit = !!wish;
+  showModal(`<h2>${isEdit ? '行きたい場所を編集' : '行きたい場所を追加'}</h2>
+    <div class="form-group"><label>場所</label><input id="fWPlace" value="${esc(w.place)}" placeholder="北海道"></div>
+    <div class="form-group"><label>メモ</label><textarea id="fWNote">${esc(w.note)}</textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>優先度</label>
+        <select id="fWPri">
+          <option value="high" ${w.priority==='high'?'selected':''}>高</option>
+          <option value="mid" ${w.priority==='mid'?'selected':''}>中</option>
+          <option value="low" ${w.priority==='low'?'selected':''}>低</option>
+        </select>
+      </div>
+      <div class="form-group"><label>予想費用（円）</label><input type="number" id="fWCost" value="${w.cost}" placeholder="50000"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="hideModal()">キャンセル</button>
+      <button class="btn" onclick="saveWish('${isEdit ? w.id : ''}')">保存</button>
+    </div>`);
+}
+
+function saveWish(id) {
+  const obj = {
+    place: document.getElementById('fWPlace').value.trim(),
+    note: document.getElementById('fWNote').value.trim(),
+    priority: document.getElementById('fWPri').value,
+    cost: parseInt(document.getElementById('fWCost').value) || 0
+  };
+  if (!obj.place) { showToast('場所を入力してください'); return; }
+  if (id) {
+    const w = data.wishlist.find(w => w.id === id);
+    if (w) Object.assign(w, obj);
+  } else {
+    data.wishlist.push({id:genId(), ...obj});
+  }
+  saveData(); hideModal(); renderWishlist();
+  showToast(id ? '更新しました' : '追加しました');
+}
+
+function editWish(id) { const w = data.wishlist.find(w => w.id === id); if (w) showWishForm(w); }
+
+function deleteWish(id) {
+  if (!confirm('削除しますか？')) return;
+  data.wishlist = data.wishlist.filter(w => w.id !== id);
+  saveData(); renderWishlist();
+  showToast('削除しました');
+}
+
+// Promote wishlist item to trip
+function promoteWish(id) {
+  const w = data.wishlist.find(w => w.id === id);
+  if (!w) return;
+  if (!confirm(`「${w.place}」を旅行として追加しますか？`)) return;
+  data.trips.push({
+    id: genId(),
+    dest: w.place,
+    dateFrom: '',
+    dateTo: '',
+    budget: w.cost || 0,
+    status: '計画中',
+    notes: w.note || '',
+    itinerary: [],
+    packing: [],
+    expenses: []
+  });
+  data.wishlist = data.wishlist.filter(item => item.id !== id);
+  saveData(); renderWishlist();
+  showToast('旅行に追加しました');
+}
+
+// ===== PHOTO NOTES CRUD =====
+function showPhotoForm(pn) {
+  const p = pn || {location:'', date:new Date().toISOString().slice(0,10), text:''};
+  const isEdit = !!pn;
+  showModal(`<h2>${isEdit ? 'メモを編集' : '旅の記録を追加'}</h2>
+    <div class="form-group"><label>場所</label><input id="fPLoc" value="${esc(p.location)}" placeholder="鎌倉・大仏"></div>
+    <div class="form-group"><label>日付</label><input type="date" id="fPDate" value="${p.date}"></div>
+    <div class="form-group"><label>メモ・思い出</label><textarea id="fPText" style="min-height:120px">${esc(p.text)}</textarea></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="hideModal()">キャンセル</button>
+      <button class="btn" onclick="savePhoto('${isEdit ? p.id : ''}')">保存</button>
+    </div>`);
+}
+
+function savePhoto(id) {
+  const obj = {
+    location: document.getElementById('fPLoc').value.trim(),
+    date: document.getElementById('fPDate').value,
+    text: document.getElementById('fPText').value.trim()
+  };
+  if (!obj.location) { showToast('場所を入力してください'); return; }
+  if (id) {
+    const p = data.photoNotes.find(p => p.id === id);
+    if (p) Object.assign(p, obj);
+  } else {
+    data.photoNotes.push({id:genId(), ...obj});
+  }
+  saveData(); hideModal(); renderPhotos();
+  showToast(id ? '更新しました' : '記録を追加しました');
+}
+
+function editPhoto(id) { const p = data.photoNotes.find(p => p.id === id); if (p) showPhotoForm(p); }
+
+function deletePhoto(id) {
+  if (!confirm('削除しますか？')) return;
+  data.photoNotes = data.photoNotes.filter(p => p.id !== id);
+  saveData(); renderPhotos();
+}
+
+// ===== EXPORT/IMPORT =====
+function exportData() {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'travel_planner_' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('エクスポート完了');
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function() {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const imported = JSON.parse(e.target.result);
+        if (imported.trips) {
+          if (!confirm('現在のデータを上書きしますか？')) return;
+          data = imported;
+          // Migration
+          if (data.trips) data.trips.forEach(t => { if (t.notes === undefined) t.notes = ''; });
+          saveData(); render();
+          showToast('インポート完了');
+        } else {
+          showToast('無効なデータ形式です');
+        }
+      } catch(err) { showToast('JSONの解析に失敗しました'); }
+    };
+    reader.readAsText(input.files[0]);
+  };
+  input.click();
+}
+
+// ===== INIT =====
+render();
+
+// Register actual SW file
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
